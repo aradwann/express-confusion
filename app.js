@@ -10,6 +10,19 @@ var dishRouter = require("./routes/dishRouter");
 var leaderRouter = require("./routes/leaderRouter");
 var promoRouter = require("./routes/promoRouter");
 
+const mongoose = require("mongoose");
+const Dish = require("./models/dish");
+
+const url = "mongodb://localhost:27017/confusion";
+const connect = mongoose.connect(url);
+connect
+  .then((db) => {
+    console.log("connected successfully to the database");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
 var app = express();
 
 // view engine setup
@@ -41,7 +54,7 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render("error");
+  res.json(err.message);
 });
 
 module.exports = app;
