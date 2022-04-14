@@ -1,7 +1,6 @@
 var express = require("express");
 
 const dishRouter = express.Router();
-const mongoose = require("mongoose");
 const Dish = require("../models/dish.js");
 
 dishRouter.route("/");
