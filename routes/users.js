@@ -1,9 +1,95 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
+const User = require("../models/user");
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+router.get("/", function (req, res, next) {
+  res.send("respond with a resource");
+});
+
+router.post("/signup", (req, res, next) => {
+  User.findOne({ username: req.body.username })
+    .then((user) => {
+      if (user) {
+        var err = new Error(`User ${req.body.username} already exists!`);
+        err.status = 403;
+        next(err);
+      } else {
+        return User.create({
+          username: req.body.username,
+          password: req.body.password,
+        })
+          .then((user) => {
+            res.statusCode = 201;
+            res.json({ status: "Registeraton Successful", user: user });
+          })
+          .catch((err) => {
+            next(err);
+          });
+      }
+    })
+    .catch((err) => {
+      next(err);
+    });
+});
+
+router.post("/login", (req, res, next) => {
+  if (!req.session.user) {
+    var authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      var err = new Error("You are not authenticated");
+      res.setHeader("WWW-Authenticate", "Basic");
+      err.status = 401;
+      return next(err);
+    }
+
+    var auth = new Buffer.from(authHeader.split(" ")[1], "base64")
+      .toString()
+      .split(":");
+
+    var username = auth[0];
+    var password = auth[1];
+
+    User.findOne({ username: username })
+      .then((user) => {
+        if (user) {
+          if (user.password === password) {
+            req.session.user = "authenticated";
+            res.statusCode = 200;
+            res.json({ success: true, message: "logged in successfully" });
+          } else {
+            var err = new Error("password is incorrect");
+            res.setHeader("WWW-Authenticate", "Basic");
+            err.status = 401;
+            return next(err);
+          }
+        } else {
+          var err = new Error(`user ${user.username} doesn't exist`);
+          res.setHeader("WWW-Authenticate", "Basic");
+          err.status = 403;
+          return next(err);
+        }
+      })
+      .catch((err) => {
+        next(err);
+      });
+  } else {
+    res.statusCode = 200;
+    res.json({ success: true, message: "you are already logged in" });
+  }
+});
+
+router.get("/logout", (req, res, next) => {
+  if (req.session) {
+    req.session.destroy();
+    res.clearCookie("session-id");
+    res.json({ success: true, message: "logged out successfully" });
+  } else {
+    var err = new Error("you are not logged in");
+    err.status = 403;
+    next(err);
+  }
 });
 
 module.exports = router;
