@@ -17,7 +17,7 @@ dishRouter
         next(err);
       });
   })
-  .post(authenticate.verifyUser, (req, res, next) => {
+  .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dish.create(req.body)
       .then((dish) => {
         console.log("Dish created", dish);
@@ -28,20 +28,24 @@ dishRouter
         next(err);
       });
   })
-  .put(authenticate.verifyUser, (req, res, next) => {
+  .put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end("PUT operation not supported on /dishes");
   })
-  .delete(authenticate.verifyUser, (req, res, next) => {
-    Dish.deleteMany({})
-      .then((resp) => {
-        res.statusCode = 200;
-        res.json(resp);
-      })
-      .catch((err) => {
-        next(err);
-      });
-  });
+  .delete(
+    authenticate.verifyUser,
+    authenticate.verifyAdmin,
+    (req, res, next) => {
+      Dish.deleteMany({})
+        .then((resp) => {
+          res.statusCode = 200;
+          res.json(resp);
+        })
+        .catch((err) => {
+          next(err);
+        });
+    }
+  );
 
 dishRouter
   .route("/:dishId")
@@ -56,12 +60,12 @@ dishRouter
         next(err);
       });
   })
-  .post(authenticate.verifyUser, (req, res, next) => {
+  .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end("POST operation not supported on /dishes/" + req.params.dishId);
   })
 
-  .put(authenticate.verifyUser, (req, res, next) => {
+  .put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dish.findByIdAndUpdate(req.params.dishId, { $set: req.body }, { new: true })
       .then((dish) => {
         res.statusCode = 200;
@@ -71,16 +75,20 @@ dishRouter
         next(err);
       });
   })
-  .delete(authenticate.verifyUser, (req, res, next) => {
-    Dish.findByIdAndDelete(req.params.dishId)
-      .then((resp) => {
-        res.statusCode = 200;
-        res.json(resp);
-      })
-      .catch((err) => {
-        next(err);
-      });
-  });
+  .delete(
+    authenticate.verifyUser,
+    authenticate.verifyAdmin,
+    (req, res, next) => {
+      Dish.findByIdAndDelete(req.params.dishId)
+        .then((resp) => {
+          res.statusCode = 200;
+          res.json(resp);
+        })
+        .catch((err) => {
+          next(err);
+        });
+    }
+  );
 
 dishRouter
   .route("/:dishId/comments")
