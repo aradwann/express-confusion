@@ -206,34 +206,43 @@ dishRouter
   .put(authenticate.verifyUser, (req, res, next) => {
     Dish.findById(req.params.dishId)
       .then((dish) => {
-        if (dish && dish.comments.id(req.params.commentId)) {
-          if (req.body.rating) {
-            dish.comments.id(req.params.commentId).rating = req.body.rating;
-          }
-          if (req.body.comment) {
-            dish.comments.id(req.params.commentId).comment = req.body.comment;
-          }
-          dish
-            .save()
-            .then((dish) => {
-              Dish.findById(dish._id)
-                .populate("comments.author")
-                .then((dish) => {
-                  res.statusCode = 200;
-                  res.json(dish);
-                });
-            })
-            .catch((err) => {
-              next(err);
-            });
-        } else {
-          let err;
-          if (!dish) {
-            err = new Error(`Dish ${req.params.dishId} not found`);
+        const userId = req.user._id;
+        const authorId = dish.comments.id(req.params.commentId).author;
+        if (userId.equals(authorId)) {
+          if (dish && dish.comments.id(req.params.commentId)) {
+            if (req.body.rating) {
+              dish.comments.id(req.params.commentId).rating = req.body.rating;
+            }
+            if (req.body.comment) {
+              dish.comments.id(req.params.commentId).comment = req.body.comment;
+            }
+            dish
+              .save()
+              .then((dish) => {
+                Dish.findById(dish._id)
+                  .populate("comments.author")
+                  .then((dish) => {
+                    res.statusCode = 200;
+                    res.json(dish);
+                  });
+              })
+              .catch((err) => {
+                next(err);
+              });
           } else {
-            err = new Error(`Comment ${req.params.commentId} not found`);
+            let err;
+            if (!dish) {
+              err = new Error(`Dish ${req.params.dishId} not found`);
+            } else {
+              err = new Error(`Comment ${req.params.commentId} not found`);
+            }
+            err.status = 404;
+            return next(err);
           }
-          err.status = 404;
+        } else {
+          const err = new Error("only comment author can update it!");
+
+          err.status = 403;
           return next(err);
         }
       })
@@ -244,25 +253,34 @@ dishRouter
   .delete(authenticate.verifyUser, (req, res, next) => {
     Dish.findById(req.params.dishId)
       .then((dish) => {
-        if (dish && dish.comments.id(req.params.commentId)) {
-          dish.comments.id(req.params.commentId).remove();
-          dish
-            .save()
-            .then((dish) => {
-              res.statusCode = 200;
-              res.json(dish);
-            })
-            .catch((err) => {
-              next(err);
-            });
-        } else {
-          let err;
-          if (!dish) {
-            err = new Error(`Dish ${req.params.dishId} not found`);
+        const userId = req.user._id;
+        const authorId = dish.comments.id(req.params.commentId).author;
+        if (userId.equals(authorId)) {
+          if (dish && dish.comments.id(req.params.commentId)) {
+            dish.comments.id(req.params.commentId).remove();
+            dish
+              .save()
+              .then((dish) => {
+                res.statusCode = 200;
+                res.json(dish);
+              })
+              .catch((err) => {
+                next(err);
+              });
           } else {
-            err = new Error(`Comment ${req.params.commentId} not found`);
+            let err;
+            if (!dish) {
+              err = new Error(`Dish ${req.params.dishId} not found`);
+            } else {
+              err = new Error(`Comment ${req.params.commentId} not found`);
+            }
+            err.status = 404;
+            return next(err);
           }
-          err.status = 404;
+        } else {
+          const err = new Error("only comment author can delete it!");
+
+          err.status = 403;
           return next(err);
         }
       })
