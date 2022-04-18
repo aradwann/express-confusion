@@ -8,9 +8,9 @@ dishRouter
   .route("/")
   .get((req, res, next) => {
     Dish.find({})
+      .populate("comments.author")
       .then((dishes) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
         res.json(dishes);
       })
       .catch((err) => {
@@ -22,7 +22,6 @@ dishRouter
       .then((dish) => {
         console.log("Dish created", dish);
         res.statusCode = 201;
-        res.setHeader("Content-Type", "application/json");
         res.json(dish);
       })
       .catch((err) => {
@@ -37,7 +36,6 @@ dishRouter
     Dish.deleteMany({})
       .then((resp) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
         res.json(resp);
       })
       .catch((err) => {
@@ -49,9 +47,9 @@ dishRouter
   .route("/:dishId")
   .get((req, res, next) => {
     Dish.findById(req.params.dishId)
+      .populate("comments.author")
       .then((dish) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
         res.json(dish);
       })
       .catch((err) => {
@@ -67,7 +65,6 @@ dishRouter
     Dish.findByIdAndUpdate(req.params.dishId, { $set: req.body }, { new: true })
       .then((dish) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
         res.json(dish);
       })
       .catch((err) => {
@@ -78,7 +75,6 @@ dishRouter
     Dish.findByIdAndDelete(req.params.dishId)
       .then((resp) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
         res.json(resp);
       })
       .catch((err) => {
@@ -91,10 +87,10 @@ dishRouter
 
   .get((req, res, next) => {
     Dish.findById(req.params.dishId)
+      .populate("comments.author")
       .then((dish) => {
         if (dish) {
           res.statusCode = 200;
-          res.setHeader("Content-Type", "application/json");
           res.json(dish.comments);
         } else {
           let err = new Error(`Dish ${req.params.dishId} not found`);
@@ -110,13 +106,17 @@ dishRouter
     Dish.findById(req.params.dishId)
       .then((dish) => {
         if (dish) {
+          req.body.author = req.user._id; // set the req.body author to user id that's set by passport JWT
           dish.comments.push(req.body);
           dish
             .save()
             .then((dish) => {
-              res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
-              res.json(dish);
+              Dish.findById(dish._id)
+                .populate("comments.author")
+                .then((dish) => {
+                  res.statusCode = 200;
+                  res.json(dish);
+                });
             })
             .catch((err) => {
               next(err);
@@ -148,7 +148,6 @@ dishRouter
             .save()
             .then((dish) => {
               res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
               res.json(dish);
             })
             .catch((err) => {
@@ -169,10 +168,10 @@ dishRouter
   .route("/:dishId/comments/:commentId")
   .get((req, res, next) => {
     Dish.findById(req.params.dishId)
+      .populate("comments.author")
       .then((dish) => {
         if (dish && dish.comments.id(req.params.commentId)) {
           res.statusCode = 200;
-          res.setHeader("Content-Type", "application/json");
           res.json(dish.comments.id(req.params.commentId));
         } else {
           let err;
@@ -209,9 +208,12 @@ dishRouter
           dish
             .save()
             .then((dish) => {
-              res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
-              res.json(dish);
+              Dish.findById(dish._id)
+                .populate("comments.author")
+                .then((dish) => {
+                  res.statusCode = 200;
+                  res.json(dish);
+                });
             })
             .catch((err) => {
               next(err);
@@ -240,7 +242,6 @@ dishRouter
             .save()
             .then((dish) => {
               res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
               res.json(dish);
             })
             .catch((err) => {
