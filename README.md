@@ -27,3 +27,5 @@ live: TODO
 - Using Cookies
 - Express Sessions
 - Token Based Authentication (JWT)
+- HTTPS and Secure Communication
+- Uploading files
