@@ -108,3 +108,8 @@ dist
 
 # populating mongodb script
 ./seed.js
+
+# https encrypytion certs and private keys
+cert.csr
+certificate.pem
+private.key
