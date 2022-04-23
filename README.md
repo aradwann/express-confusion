@@ -29,3 +29,4 @@ live: TODO
 - Token Based Authentication (JWT)
 - HTTPS and Secure Communication
 - Uploading files
+- CORS
