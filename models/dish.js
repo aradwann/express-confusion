@@ -1,5 +1,5 @@
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
 const commentSchema = new Schema(
   {
@@ -7,63 +7,63 @@ const commentSchema = new Schema(
       type: Number,
       min: 1,
       max: 5,
-      required: true,
+      required: true
     },
     comment: {
       type: String,
-      required: true,
+      required: true
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+      ref: 'User',
+      required: true
+    }
   },
   { timestamps: true }
-);
+)
 
 const dishSchema = new Schema(
   {
     name: {
       type: String,
       required: true,
-      unique: true,
+      unique: true
     },
     description: {
       type: String,
-      required: true,
+      required: true
     },
     image: {
       type: String,
-      required: true,
+      required: true
     },
     category: {
       type: String,
-      required: true,
+      required: true
     },
     label: {
       type: String,
-      default: "",
+      default: ''
     },
     price: {
       type: Number,
       get: (v) => (v / 100).toFixed(2),
       set: (v) => v * 100,
       required: true,
-      min: 0,
+      min: 0
     },
     featured: {
       type: Boolean,
-      default: false,
+      default: false
     },
-    comments: [commentSchema],
+    comments: [commentSchema]
   },
   {
-    timestamps: true,
+    timestamps: true
     // toJSON: { getters: true  }, // activates the getter in the json response
   }
-);
+)
 
-var Dish = mongoose.model("Dish", dishSchema);
+const Dish = mongoose.model('Dish', dishSchema)
 
-module.exports = Dish;
+module.exports = Dish

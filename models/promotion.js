@@ -1,22 +1,22 @@
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
 const promotionSchema = new Schema(
   {
     name: {
       type: String,
       required: true,
-      unique: true,
+      unique: true
     },
 
     image: {
       type: String,
-      required: true,
+      required: true
     },
 
     label: {
       type: String,
-      default: "",
+      default: ''
     },
 
     price: {
@@ -24,23 +24,23 @@ const promotionSchema = new Schema(
       get: (v) => (v / 100).toFixed(2),
       set: (v) => v * 100,
       required: true,
-      min: 0,
+      min: 0
     },
     description: {
       type: String,
-      required: true,
+      required: true
     },
     featured: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
     // toJSON: { getters: true  }, // activates the getter in the json response
   }
-);
+)
 
-var Promotion = mongoose.model("Promotion", promotionSchema);
+const Promotion = mongoose.model('Promotion', promotionSchema)
 
-module.exports = Promotion;
+module.exports = Promotion
