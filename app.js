@@ -15,7 +15,12 @@ const favoriteRouter = require('./routes/favoriteRouter')
 
 const mongoose = require('mongoose')
 
-const url = config.mongoUrl
+let url
+if (config.NODE_ENV === 'testing') {
+  url = config.mongoTestUrl
+} else {
+  url = config.mongoUrl
+}
 console.log(url)
 const connect = mongoose.connect(url)
 connect
@@ -29,16 +34,16 @@ connect
 const app = express()
 
 // redirect insecure (http) requests to secure https port
-app.all('*', (req, res, next) => {
-  if (req.secure) {
-    return next()
-  } else {
-    res.redirect(
-      307,
-      'https://' + req.hostname + ':' + app.get('secPort') + req.url
-    )
-  }
-})
+// app.all('*', (req, res, next) => {
+//   if (req.secure) {
+//     return next()
+//   } else {
+//     res.redirect(
+//       307,
+//       'https://' + req.hostname + ':' + app.get('secPort') + req.url
+//     )
+//   }
+// })
 
 app.use(logger('dev'))
 app.use(express.json())

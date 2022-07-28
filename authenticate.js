@@ -20,9 +20,9 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 opts.secretOrKey = config.secretKey
 
 exports.jwtPassport = passport.use(
-  new JwtStrategy(opts, (jwt_payload, done) => {
-    console.log(`JWT payload: ${JSON.stringify(jwt_payload)}`)
-    User.findOne({ _id: jwt_payload._id }, (err, user) => {
+  new JwtStrategy(opts, (jwtPayload, done) => {
+    console.log(`JWT payload: ${JSON.stringify(jwtPayload)}`)
+    User.findOne({ _id: jwtPayload._id }, (err, user) => {
       if (err) {
         return done(err, false)
       } else if (user) {
@@ -39,7 +39,7 @@ exports.verifyAdmin = (req, res, next) => {
   if (req.user.admin) {
     next()
   } else {
-    err = new Error('You are not authorized to perform this operation!')
+    const err = new Error('You are not authorized to perform this operation!')
     err.status = 403
     next(err)
   }
